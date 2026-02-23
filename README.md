@@ -1,157 +1,44 @@
-# Databricks Weather & Air Quality Lakehouse Pipeline
+# 🇮🇹 Italy Real-Time Environmental Digital Twin
 
-## Overview
+## 📌 Project Overview
+This project is an automated, self-healing Data Engineering pipeline built on the **Databricks Lakehouse Platform**. It ingests real-time Weather and Air Quality data for major Italian cities (Rome, Milan, Turin, Florence) and processes it through a **Medallion Architecture** to power a live "Digital Twin" monitoring dashboard.
 
-This project demonstrates an **end-to-end Databricks Lakehouse ETL pipeline** built using public REST APIs for **weather** and **air quality** data. The pipeline follows **Bronze–Silver–Gold architecture** and simulates streaming ingestion using **scheduled micro-batch jobs**.
+![Dashboard Screenshot](./docs/dashboard_screenshot.png)
 
-The goal of this project is to showcase **production-style data engineering practices** on Databricks, aligned with **Databricks Data Engineer Associate** concepts.
+## 🏗️ Architecture & Data Flow
+The pipeline utilizes **Databricks Delta Live Tables (DLT)** and declarative PySpark to orchestrate a Bronze-Silver-Gold data flow.
 
----
+### 1. Ingestion (The Fetcher)
+* A Python script runs via Databricks Workflows every 15 minutes.
+* Fetches live telemetry from the Open-Meteo API.
+* Lands raw JSON payload into Databricks Unity Catalog Volumes.
 
-## Architecture
+### 2. Bronze Layer (Raw Data)
+* Built using **Databricks Auto Loader (`cloudFiles`)**.
+* Incrementally streams new JSON files into Delta tables.
+* Implements `schemaEvolutionMode = "rescue"` to prevent pipeline crashes if the upstream API schema changes.
+* Adds ingestion timestamps and metadata for lineage tracking.
 
-**Data Flow**
+### 3. Silver Layer (Cleaned & Deduplicated)
+* Utilizes DLT **Streaming Views** to unnest complex JSON structures and cast data types on the fly.
+* Enforces Data Quality using DLT expectations (`@dp.expect_or_drop`).
+* Implements **Change Data Capture (CDC)** using `dp.create_auto_cdc_flow`.
+* **SCD Type 1 logic:** Ensures the target table maintains only the *single latest* environment state per city, resolving conflicts using the ingestion timestamp.
 
-```
-Open-Meteo APIs
-     ↓
-Bronze Layer (Raw JSON, Append-Only)
-     ↓
-Silver Layer (Schema Enforcement, Parsing, Time-Series)
-     ↓
-Gold Layer (Analytics & Aggregations)
-```
+### 4. Gold Layer (Business Level)
+* A **Materialized View** that joins the deduplicated Weather and Air Quality Silver tables.
+* Applies business logic (e.g., categorizing PM10 pollution levels into an `air_quality_status` flag).
+* Serves as a clean, highly optimized backend for the Databricks SQL Dashboard.
 
-**Technologies Used**
+## 🛠️ Tech Stack
+* **Platform:** Databricks (Lakeflow / Unity Catalog)
+* **Compute:** Serverless DLT Pipeline / Job Clusters
+* **Languages:** PySpark, Python, Databricks SQL
+* **Frameworks:** Delta Live Tables (DLT), Structured Streaming
+* **Visualization:** Databricks SQL Dashboards
+* **Source API:** Open-Meteo
 
-* Databricks
-* Apache Spark (PySpark)
-* Delta Lake
-* REST APIs (Open-Meteo)
-* Databricks Jobs (Scheduling)
-
----
-
-## Data Sources
-
-**Open-Meteo APIs (No API Key Required)**
-
-* Weather API (current weather snapshots)
-* Air Quality API (hourly AQI forecasts – 5 days)
-
-These APIs are ideal for demos and interviews because they are public, stable, and easy to integrate.
-
----
-
-## Project Structure
-
-```
-databricks-weather-pipeline/
-│
-├── notebooks/
-│   ├── 01_ingest_weather_api.py
-│   ├── 02_ingest_air_quality_api.py
-│   ├── 03_bronze_to_silver_weather.py
-│   ├── 03_bronze_to_silver_air_quality.py
-│   ├── 04_silver_to_gold.py
-│
-├── config/
-│   └── api_config.py
-│
-├── sql/
-│   └── analytics_queries.sql
-│
-└── README.md
-```
-
----
-
-## Bronze Layer – Raw Ingestion
-
-**Objective**
-
-* Ingest raw JSON data from REST APIs
-* Store data exactly as received
-* Append-only writes
-* Add ingestion metadata
-
-**Key Characteristics**
-
-* No transformations
-* No schema enforcement
-* Immutable raw data
-
-**Metadata Columns**
-
-* `ingestion_timestamp`
-* `source_api`
-* `location`
-
-Streaming is simulated by running ingestion notebooks as **scheduled Databricks Jobs** (micro-batches).
-
----
-
-## Silver Layer – Clean & Historical Data
-
-**Objective**
-
-* Parse raw JSON payloads
-* Enforce explicit schemas
-* Create historical datasets
-
-**Silver Tables**
-
-* `silver_weather_current` – weather snapshots per city
-* `silver_air_quality_hourly` – hourly AQI time-series
-
-**Key Processing**
-
-* JSON parsing with predefined schemas
-* Explosion of hourly AQI arrays (120+ rows per ingestion)
-* Deduplication using window functions
-
----
-
-## Gold Layer – Analytics & Business Views
-
-**Objective**
-
-* Create analytics-ready tables
-* Apply business logic
-* Optimize for BI and SQL queries
-
-**Gold Tables**
-
-* `gold_daily_air_quality` – daily average AQI per city
-* `gold_latest_conditions` – latest weather and AQI per city
-* `gold_weather_aqi_correlation` – weather vs AQI analysis
-
-**Important Logic**
-
-* AQI hourly data is deduplicated per city and hour using the latest ingestion timestamp
-* Daily averages are computed from exactly **24 hourly values per day**
-
----
-
-## Key Learnings
-
-* Designing a production-style **Lakehouse architecture** on Databricks
-* Handling **API-based ingestion** with micro-batch scheduling
-* Managing **time-series data** and forecast duplication
-* Building **analytics-ready datasets** using Delta Lake
-
----
-
-## How to Run
-
-1. Create a Databricks workspace
-2. Import the repository as a Databricks Repo
-3. Configure API endpoints in `config/api_config.py`
-4. Run ingestion notebooks manually or via Databricks Jobs
-5. Execute Silver and Gold notebooks in order
-
----
-
-## Author
-
-This project was built as a **data engineering portfolio project** to demonstrate Databricks and Lakehouse best practices.
+## 🚀 Key Engineering Highlights
+* **Decoupled Ingestion:** API fetching is isolated from Spark processing. If the API goes down, the Spark pipeline doesn't fail; it just waits for new files.
+* **Cost Optimized:** Used `@dp.view` instead of `@dp.table` for intermediate flattening steps to prevent writing unnecessary data to cloud storage.
+* **Idempotent & Resilient:** The CDC sequence logic ensures that even if the pipeline needs to be fully refreshed or re-run, it will accurately rebuild the correct current state without duplicating records.
