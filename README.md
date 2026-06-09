@@ -3,7 +3,7 @@
 ## 📌 Project Overview
 This project is an automated, self-healing Data Engineering pipeline built on the **Databricks Lakehouse Platform**. It ingests real-time Weather and Air Quality data for major Italian cities (Rome, Milan, Turin, Florence) and processes it through a **Medallion Architecture**, topped with a governed **Metric Layer**, to power a live "Digital Twin" monitoring dashboard.
 
-![Dashboard Screenshot](./docs/Italy Real-Time Environmental Digital Twin.png)
+![Dashboard Screenshot](docs/Italy_Real-Time_Environmental_Digital_Twin.png)
 
 ## 🏗️ Architecture & Data Flow
 The pipeline utilizes **Databricks Delta Live Tables (DLT)** and declarative PySpark to orchestrate a Bronze-Silver-Gold data flow, culminating in a governed semantic layer for BI consumption.
