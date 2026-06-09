@@ -1,0 +1,679 @@
+{
+  "datasets": [
+    {
+      "name": "1bd1bd86",
+      "displayName": "Dashboard Data",
+      "config": {
+        "version": "1.1",
+        "source": "SELECT *\r\nFROM weather.gold.current_environmen_metrics",
+        "dimensions": [
+          {
+            "displayName": "City",
+            "synonyms": [
+              "location",
+              "municipality",
+              "city name",
+              "urban area"
+            ],
+            "name": "city",
+            "expr": "source.city",
+            "comment": "Represents the city associated with each record in the dataset. Use this dimension to analyze data by geographic location or to filter results by specific cities."
+          },
+          {
+            "displayName": "Latest Updated At",
+            "format": {
+              "type": "date_time",
+              "leadingZeros": true,
+              "dateFormat": "year_month_day",
+              "timeFormat": "locale_hour_minute"
+            },
+            "synonyms": [
+              "last updated",
+              "most recent update",
+              "updated timestamp",
+              "latest modification time"
+            ],
+            "name": "latest_updated_at",
+            "expr": "FROM_UTC_TIMESTAMP(source.latest_updated_at, 'GMT+2')",
+            "comment": "Represents the most recent timestamp when the record was updated, converted to GMT+2. Use this dimension to track the latest changes made to the data."
+          },
+          {
+            "displayName": "Temperature",
+            "format": {
+              "type": "number",
+              "decimalPlaces": {
+                "type": "all"
+              },
+              "abbreviation": "none",
+              "hideGroupSeparator": false
+            },
+            "synonyms": [
+              "temp",
+              "degree Celsius",
+              "temperature reading",
+              "ambient temperature"
+            ],
+            "name": "temperature",
+            "expr": "source.temperature",
+            "comment": "Represents the temperature recorded in degrees, which can be used for analyzing weather patterns, climate trends, or any temperature-related metrics."
+          },
+          {
+            "displayName": "Wind Speed",
+            "format": {
+              "type": "number",
+              "decimalPlaces": {
+                "type": "all"
+              },
+              "abbreviation": "none",
+              "hideGroupSeparator": false
+            },
+            "synonyms": [
+              "wind speed",
+              "air speed",
+              "velocity of wind",
+              "wind velocity"
+            ],
+            "name": "wind_speed",
+            "expr": "source.wind_speed",
+            "comment": "Represents the speed of the wind measured in appropriate units, allowing users to analyze weather patterns and their impact on various metrics."
+          },
+          {
+            "displayName": "Weather Code",
+            "format": {
+              "type": "number",
+              "decimalPlaces": {
+                "type": "all"
+              },
+              "abbreviation": "none",
+              "hideGroupSeparator": false
+            },
+            "synonyms": [
+              "weather condition",
+              "weather type",
+              "atmospheric condition",
+              "climate status"
+            ],
+            "name": "weather_code",
+            "expr": "source.weather_code",
+            "comment": "Represents the weather condition associated with a specific observation, such as sunny, rainy, or cloudy. Use this dimension to filter or categorize data based on weather patterns."
+          },
+          {
+            "displayName": "PM10 Levels",
+            "format": {
+              "type": "number",
+              "decimalPlaces": {
+                "type": "all"
+              },
+              "abbreviation": "none",
+              "hideGroupSeparator": false
+            },
+            "synonyms": [
+              "PM10 Concentration",
+              "PM10 Particulate Matter",
+              "Air Quality PM10",
+              "PM10 Levels in Air"
+            ],
+            "name": "pm10",
+            "expr": "source.pm10",
+            "comment": "Represents the levels of PM10 particulate matter in the air, measured in micrograms per cubic meter (µg/m³). This dimension can be used to analyze air quality and its impact on health and the environment."
+          },
+          {
+            "displayName": "PM2.5 Levels",
+            "format": {
+              "type": "number",
+              "decimalPlaces": {
+                "type": "all"
+              },
+              "abbreviation": "none",
+              "hideGroupSeparator": false
+            },
+            "synonyms": [
+              "PM2.5 concentration",
+              "particulate matter 2.5",
+              "air quality index",
+              "fine particulate matter"
+            ],
+            "name": "pm2_5",
+            "expr": "source.pm2_5",
+            "comment": "Represents the concentration levels of PM2.5 particulate matter in the air, measured in micrograms per cubic meter (µg/m³). This dimension can be used to analyze air quality trends and assess environmental health impacts."
+          },
+          {
+            "displayName": "Air Quality Status",
+            "synonyms": [
+              "air quality condition",
+              "air quality level",
+              "environmental air status",
+              "air pollution status"
+            ],
+            "name": "air_quality_status",
+            "expr": "source.air_quality_status",
+            "comment": "Indicates the current air quality status, which can be used to assess environmental conditions and inform decisions related to health and safety."
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    }
+  ],
+  "pages": [
+    {
+      "name": "1323da61",
+      "displayName": "Environmental Overview",
+      "layout": [
+        {
+          "widget": {
+            "name": "avg_temp_counter",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "1bd1bd86",
+                  "fields": [
+                    {
+                      "name": "avg(temperature)",
+                      "expression": "AVG(`temperature`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "National Mean Temperature (°C)",
+                "showTitle": true,
+                "headerAlignment": "center"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "avg(temperature)",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 2
+                    }
+                  },
+                  "style": {
+                    "bold": true
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "avg_pm25_counter",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "1bd1bd86",
+                  "fields": [
+                    {
+                      "name": "avg(pm2_5)",
+                      "expression": "AVG(`pm2_5`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "National Mean PM2.5 (μg/m³)",
+                "showTitle": true,
+                "headerAlignment": "center"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "avg(pm2_5)",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 2
+                    },
+                    "significantFigures": {
+                      "type": "all"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 4,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "avg_pm10_counter",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "1bd1bd86",
+                  "fields": [
+                    {
+                      "name": "avg(pm10)",
+                      "expression": "AVG(`pm10`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "National Average PM10 (μg/m³)",
+                "showTitle": true,
+                "headerAlignment": "center"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "avg(pm10)",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 2
+                    }
+                  },
+                  "style": {
+                    "bold": true
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 4,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "temp_by_city_bar",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "1bd1bd86",
+                  "fields": [
+                    {
+                      "name": "city",
+                      "expression": "`city`"
+                    },
+                    {
+                      "name": "avg(temperature)",
+                      "expression": "AVG(`temperature`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Temperature by City",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "city",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(temperature)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 12,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "wind_by_city_bar",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "1bd1bd86",
+                  "fields": [
+                    {
+                      "name": "city",
+                      "expression": "`city`"
+                    },
+                    {
+                      "name": "avg(wind_speed)",
+                      "expression": "AVG(`wind_speed`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Wind Speed by City",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "city",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(wind_speed)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 12,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "pm25_by_city_bar",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "1bd1bd86",
+                  "fields": [
+                    {
+                      "name": "city",
+                      "expression": "`city`"
+                    },
+                    {
+                      "name": "avg(pm2_5)",
+                      "expression": "AVG(`pm2_5`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "PM2.5 Levels by City",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "city",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(pm2_5)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 16,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "pm10_by_city_bar",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "1bd1bd86",
+                  "fields": [
+                    {
+                      "name": "city",
+                      "expression": "`city`"
+                    },
+                    {
+                      "name": "avg(pm10)",
+                      "expression": "AVG(`pm10`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "PM10 Levels by City",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "city",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(pm10)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 16,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "f686ce87",
+            "multilineTextboxSpec": {
+              "lines": [
+                "# <span style=\"text-align:center;display:block;\"><span style=\"font-size:36px;line-height:1.5;font-family:Times New Roman\">**Italy Real-Time Environmental Digital Twin**</span></span>"
+              ],
+              "verticalAlign": "VERTICAL_ALIGN_CENTER"
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "real-time-environmental-heatmap",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "1bd1bd86",
+                  "fields": [
+                    {
+                      "name": "temperature",
+                      "expression": "`temperature`"
+                    },
+                    {
+                      "name": "city",
+                      "expression": "`city`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "frame": {
+                "showTitle": true,
+                "title": "Real-Time Environmental Heatmap",
+                "headerAlignment": "center"
+              },
+              "widgetType": "choropleth-map",
+              "encodings": {
+                "color": {
+                  "fieldName": "temperature",
+                  "scale": {
+                    "type": "quantitative",
+                    "colorRamp": {
+                      "mode": "scheme",
+                      "scheme": "viridis"
+                    },
+                    "reverse": false
+                  }
+                },
+                "extra": [
+                  {
+                    "fieldName": "temperature"
+                  }
+                ],
+                "region": {
+                  "regionType": "mapbox-v4-admin",
+                  "admin0": {
+                    "type": "value",
+                    "value": "Italia",
+                    "geographicRole": "admin0-name"
+                  },
+                  "admin2": {
+                    "fieldName": "city",
+                    "type": "field",
+                    "geographicRole": "admin2-name"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 6,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "last-updated-at",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "1bd1bd86",
+                  "fields": [
+                    {
+                      "name": "latest_updated_at",
+                      "expression": "`latest_updated_at`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Last Updated At",
+                "headerAlignment": "center"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "latest_updated_at",
+                  "style": {
+                    "bold": true,
+                    "rules": [
+                      {
+                        "condition": {
+                          "operator": ">="
+                        },
+                        "color": "#00A972"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 12,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}

@@ -17,7 +17,10 @@ def current_environment_metrics():
         how = "inner"
     ).select(
         weather_df["city"],
-        weather_df["event_time"].alias("weather_updated_at"),
+        F.greatest(
+            weather_df["event_time"].cast("timestamp"),
+            air_quality_df["event_time"].cast("timestamp")
+        ).alias("latest_updated_at"),
         weather_df["temperature"],
         weather_df["wind_speed"],
         weather_df["weather_code"],
